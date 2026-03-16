@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoCore — Global Issues Revision</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════
+   DARK MODE (default — OLED blacks)
+══════════════════════════════════ */
+:root {
+  --bg:       #000000;
+  --surface:  #0a0a0f;
+  --card:     #0f0f18;
+  --card2:    #13131e;
+  --border:   #1e1e30;
+  --border2:  #2a2a40;
+  --teal:     #00d4b8;
+  --teal-dim: #009e88;
+  --teal-glow:rgba(0,212,184,0.12);
+  --amber:    #f5a623;
+  --amber-dim:#c07800;
+  --red:      #ff5566;
+  --blue:     #4488ff;
+  --green:    #44cc88;
+  --text:     #e8eaf2;
+  --text2:    #a8aab8;
+  --muted:    #555568;
+  --scan:     rgba(0,212,184,0.03);
+}
+
+html.light {
+  --bg:       #f0f2f8;
+  --surface:  #e8eaf4;
+  --card:     #ffffff;
+  --card2:    #f5f6fc;
+  --border:   #d0d4e8;
+  --border2:  #b8bdd8;
+  --teal:     #007a68;
+  --teal-dim: #005a4e;
+  --teal-glow:rgba(0,122,104,0.1);
+  --amber:    #c07800;
+  --amber-dim:#8a5500;
+  --red:      #cc2233;
+  --blue:     #2255cc;
+  --green:    #228855;
+  --text:     #0f1020;
+  --text2:    #3a3d54;
+  --muted:    #7a7d98;
+  --scan:     rgba(0,122,104,0.03);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background .3s,color .3s;
+}
+
+/* Scanline effect */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,var(--scan) 0px,var(--scan) 1px,transparent 1px,transparent 4px);
+}
+
+/* ── THEME TOGGLE ── */
+.tog{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
+  width:2.8rem;height:2.8rem;border-radius:50%;
+  background:var(--card);border:1.5px solid var(--border2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.tog:hover{transform:scale(1.15) rotate(20deg);border-color:var(--teal);box-shadow:0 6px 24px rgba(0,212,184,0.25);}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:3rem 2rem 5rem;
+  overflow:hidden;
+  background:var(--bg);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,184,0.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,184,0.05) 1px,transparent 1px),
+    linear-gradient(rgba(0,212,184,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,184,0.02) 1px,transparent 1px);
+  background-size:100px 100px,100px 100px,20px 20px,20px 20px;
+}
+html.light .hero-grid{
+  background-image:
+    linear-gradient(rgba(0,122,104,0.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,122,104,0.07) 1px,transparent 1px),
+    linear-gradient(rgba(0,122,104,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,122,104,0.03) 1px,transparent 1px);
+  background-size:100px 100px,100px 100px,20px 20px,20px 20px;
+}
+.hero-glow{
+  position:absolute;width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,184,0.08) 0%,transparent 70%);
+  left:50%;top:50%;transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.status-bar{
+  position:relative;z-index:1;
+  display:inline-flex;align-items:center;gap:.6rem;
+  border:1px solid var(--border2);
+  background:var(--card);
+  border-radius:4px;padding:.35rem 1rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:2rem;
+  opacity:0;animation:fadeUp .6s ease .1s forwards;
+}
+.status-bar::before{
+  content:'';width:.5rem;height:.5rem;border-radius:50%;
+  background:var(--teal);animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero h1{
+  position:relative;z-index:1;
+  font-family:'Fraunces',serif;
+  font-size:clamp(3rem,10vw,7.5rem);
+  font-weight:900;line-height:.9;
+  color:var(--text);
+  opacity:0;animation:fadeUp .8s ease .2s forwards;
+}
+.hero h1 em{font-style:italic;color:var(--teal);}
+.hero-sub{
+  position:relative;z-index:1;
+  font-size:.95rem;font-weight:300;color:var(--text2);
+  max-width:500px;line-height:1.7;margin:1.25rem auto 2.5rem;
+  opacity:0;animation:fadeUp .7s ease .4s forwards;
+}
+.hero-chips{
+  position:relative;z-index:1;
+  display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;
+  max-width:680px;margin:0 auto 2.5rem;
+  opacity:0;animation:fadeUp .7s ease .55s forwards;
+}
+.chip{
+  padding:.3rem .85rem;background:var(--card);
+  border:1px solid var(--border2);border-radius:3px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text2);cursor:pointer;transition:all .15s;
+}
+.chip:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-glow);}
+.hero-btns{
+  position:relative;z-index:1;
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:fadeUp .7s ease .7s forwards;
+}
+.btn{
+  padding:.8rem 1.9rem;border:none;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.78rem;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;
+}
+.btn-p{background:var(--teal);color:#000;}
+.btn-p:hover{filter:brightness(1.15);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,212,184,.35);}
+.btn-g{background:transparent;color:var(--teal);border:1.5px solid var(--teal-dim);}
+.btn-g:hover{background:var(--teal-glow);border-color:var(--teal);}
+
+/* ── NAV ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(0,0,0,0.92);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  overflow-x:auto;
+}
+html.light .nav{background:rgba(240,242,248,0.95);}
+.nav-inner{display:flex;max-width:1200px;margin:0 auto;padding:0 .5rem;}
+.nb{
+  padding:.85rem 1rem;background:none;border:none;
+  color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:.64rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:.1em;
+  cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;
+}
+.nb:hover,.nb.on{color:var(--teal);border-bottom-color:var(--teal);}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1060px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1;}
+.sec{display:none;padding:4rem 0 7rem;}
+.sec.on{display:block;}
+
+/* ── SECTION HEADER ── */
+.sh{margin-bottom:3rem;}
+.sh-tag{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  letter-spacing:.28em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:.6rem;
+}
+.sh-title{
+  font-family:'Fraunces',serif;
+  font-size:clamp(2rem,5vw,3.8rem);font-weight:900;line-height:1.0;
+  color:var(--text);
+}
+.sh-title em{font-style:italic;color:var(--teal);}
+.sh-desc{
+  margin-top:.75rem;color:var(--text2);
+  font-size:.9rem;max-width:580px;line-height:1.75;font-weight:300;
+}
+.sh-line{height:1px;background:linear-gradient(90deg,var(--teal-dim),transparent);margin-top:1.5rem;}
+
+/* ── STAT PANELS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin:2rem 0;}
+.stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:1.25rem 1rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--teal);
+}
+.stat-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:1.6rem;font-weight:700;color:var(--teal);line-height:1;
+  margin-bottom:.3rem;
+}
+.stat-val.amber{color:var(--amber);}
+.stat-val.red{color:var(--red);}
+.stat-val.blue{color:var(--blue);}
+.stat-lbl{font-size:.72rem;color:var(--muted);font-weight:400;letter-spacing:.04em;}
+
+/* ── CARDS ── */
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;margin:1.5rem 0;}
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:1.5rem;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--teal),var(--blue));
+  transform:scaleX(0);transform-origin:left;transition:transform .25s;
+}
+.card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4);}
+.card:hover::after{transform:scaleX(1);}
+.card-ico{font-size:1.6rem;margin-bottom:.6rem;}
+.card h3{font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:.4rem;}
+.card p{font-size:.83rem;color:var(--text2);line-height:1.65;font-weight:300;}
+
+/* ── TABLES ── */
+.gt{width:100%;border-collapse:collapse;font-size:.85rem;margin:1.25rem 0;}
+.gt th{
+  background:var(--card2);color:var(--teal);
+  padding:.65rem .9rem;text-align:left;
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;
+  letter-spacing:.1em;text-transform:uppercase;
+  border-bottom:1px solid var(--border2);
+}
+.gt td{
+  padding:.6rem .9rem;border-bottom:1px solid var(--border);
+  color:var(--text2);line-height:1.5;vertical-align:top;
+}
+.gt tr:hover td{background:var(--teal-glow);}
+strong{color:var(--text);font-weight:600;}
+
+/* ── DARK PANEL ── */
+.dp{
+  background:var(--card);border:1px solid var(--border);
+  border-left:3px solid var(--teal);
+  border-radius:0 6px 6px 0;padding:1.5rem 1.75rem;margin:1.25rem 0;
+}
+.dp h4{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:.9rem;
+}
+.dp ul{list-style:none;display:flex;flex-direction:column;gap:.45rem;}
+.dp li{
+  font-size:.86rem;line-height:1.65;padding-left:1.2rem;position:relative;
+  color:var(--text2);font-weight:300;
+}
+.dp li::before{content:'›';position:absolute;left:0;color:var(--teal);}
+
+/* ── AMBER PANEL ── */
+.ap{
+  background:var(--card);border:1px solid var(--border);
+  border-left:3px solid var(--amber);
+  border-radius:0 6px 6px 0;padding:1.5rem 1.75rem;margin:1.25rem 0;
+}
+.ap h4{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:.9rem;
+}
+.ap ul{list-style:none;display:flex;flex-direction:column;gap:.45rem;}
+.ap li{
+  font-size:.86rem;line-height:1.65;padding-left:1.2rem;position:relative;
+  color:var(--text2);font-weight:300;
+}
+.ap li::before{content:'›';position:absolute;left:0;color:var(--amber);}
+
+/* ── HIGHLIGHT BOX ── */
+.hl{
+  background:var(--teal-glow);border:1px solid rgba(0,212,184,.2);
+  border-radius:6px;padding:1rem 1.5rem;margin:1.25rem 0;
+  font-size:.88rem;line-height:1.75;color:var(--text2);
+}
+.hl strong{color:var(--teal);}
+html.light .hl{background:rgba(0,122,104,.07);border-color:rgba(0,122,104,.2);}
+html.light .hl strong{color:var(--teal);}
+
+/* ── STEPS ── */
+.steps{padding-left:2.5rem;border-left:2px solid var(--border2);margin:1.5rem 0;}
+.step{position:relative;padding:0 0 1.5rem 1.5rem;}
+.step::before{
+  content:attr(data-n);
+  position:absolute;left:-2.1rem;top:0;
+  width:1.7rem;height:1.7rem;
+  background:var(--teal);color:#000;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.step h5{font-weight:700;color:var(--text);margin-bottom:.25rem;font-size:.92rem;}
+.step p{color:var(--text2);font-size:.85rem;line-height:1.65;font-weight:300;}
+
+/* ── TWO/THREE COL ── */
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0;}
+.thc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;margin:1.5rem 0;}
+@media(max-width:680px){.tc,.thc{grid-template-columns:1fr;}}
+
+/* ── FULL CARD ── */
+.fc{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:1.75rem;margin-bottom:1.5rem;
+}
+.fc h4{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:1rem;padding-bottom:.5rem;
+  border-bottom:1px solid var(--border);
+}
+
+/* ── BODY TEXT ── */
+.bp{color:var(--text2);font-size:.9rem;line-height:1.8;font-weight:300;margin-bottom:.75rem;}
+.h2s{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--text);margin:2rem 0 .75rem;}
+.h2s.teal{color:var(--teal);}
+hr.g{border:none;border-top:1px solid var(--border);margin:2rem 0;}
+.badge{
+  display:inline-block;padding:.15rem .55rem;
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  letter-spacing:.06em;text-transform:uppercase;border-radius:3px;margin:.1rem;
+}
+.badge.t{background:rgba(0,212,184,.15);color:var(--teal);border:1px solid rgba(0,212,184,.3);}
+.badge.a{background:rgba(245,166,35,.15);color:var(--amber);border:1px solid rgba(245,166,35,.3);}
+.badge.r{background:rgba(255,85,102,.15);color:var(--red);border:1px solid rgba(255,85,102,.3);}
+.badge.b{background:rgba(68,136,255,.15);color:var(--blue);border:1px solid rgba(68,136,255,.3);}
+
+/* ── QUIZ ── */
+.qwrap{max-width:740px;margin:0 auto;}
+.qprog{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;}
+.qbar{flex:1;height:4px;background:var(--border2);border-radius:100px;overflow:hidden;}
+.qfill{height:100%;background:var(--teal);border-radius:100px;transition:width .4s;}
+.qtxt{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);white-space:nowrap;}
+.qcard{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:2.25rem;animation:fadeUp .35s ease;
+}
+.qtag{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:.75rem;}
+.qtext{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:1.75rem;}
+.qopts{display:flex;flex-direction:column;gap:.6rem;}
+.qopt{
+  display:flex;align-items:flex-start;gap:.85rem;
+  padding:.85rem 1rem;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;
+  cursor:pointer;transition:all .15s;
+  font-size:.88rem;color:var(--text2);line-height:1.5;text-align:left;
+}
+.qopt:hover:not(:disabled){border-color:var(--teal);background:var(--teal-glow);}
+.oltr{
+  min-width:1.45rem;height:1.45rem;background:var(--border2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;
+  color:var(--muted);display:flex;align-items:center;justify-content:center;
+  border-radius:3px;flex-shrink:0;
+}
+.qopt.cor{border-color:#44cc88;background:rgba(68,204,136,.1);}
+.qopt.cor .oltr{background:#44cc88;color:#000;}
+.qopt.wrg{border-color:var(--red);background:rgba(255,85,102,.08);}
+.qopt.wrg .oltr{background:var(--red);color:#fff;}
+.qopt:disabled{cursor:default;}
+.qexp{margin-top:1rem;padding:.85rem 1rem;border-left:2px solid var(--teal);background:var(--teal-glow);font-size:.85rem;color:var(--text2);line-height:1.65;display:none;}
+.qexp.show{display:block;}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;}
+.qsc{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);}
+.qsc span{color:var(--teal);font-weight:700;}
+.rcard{
+  background:var(--card);border:1px solid var(--border2);
+  border-top:3px solid var(--teal);
+  border-radius:8px;padding:3.5rem;text-align:center;
+  animation:fadeUp .5s ease;
+}
+.rscore{font-family:'Fraunces',serif;font-size:6rem;font-weight:900;font-style:italic;color:var(--teal);line-height:1;}
+.rlbl{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.15em;color:var(--muted);margin-bottom:1.5rem;text-transform:uppercase;}
+.rmsg{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:2.5rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<button class="tog" id="togBtn" onclick="toggleTheme()" title="Toggle light/dark">☀️</button>
+
+<!-- ─── HERO ─── -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="status-bar">GeoCore Revision Terminal · v2.0 · 5 Modules Loaded</div>
+  <h1>Global<br><em>Issues</em><br>Revision</h1>
+  <p class="hero-sub">Comprehensive notes, data panels & quizzes covering Resources, Development, Economy, Population, and World Issues.</p>
+  <div class="hero-chips">
+    <button class="chip" onclick="go('resources')">Resources &amp; Environment</button>
+    <button class="chip" onclick="go('development')">International Development</button>
+    <button class="chip" onclick="go('economy')">Economic Activity</button>
+    <button class="chip" onclick="go('population')">Population</button>
+    <button class="chip" onclick="go('world')">World Issues</button>
+  </div>
+  <div class="hero-btns">
+    <button class="btn btn-p" onclick="go('resources')">Start Revising →</button>
+    <button class="btn btn-g" onclick="go('quiz')">Take the Quiz</button>
+  </div>
+</header>
+
+<!-- ─── NAV ─── -->
+<nav class="nav" id="topnav">
+  <div class="nav-inner">
+    <button class="nb" onclick="go('resources')">Resources</button>
+    <button class="nb" onclick="go('development')">Development</button>
+    <button class="nb" onclick="go('economy')">Economy</button>
+    <button class="nb" onclick="go('population')">Population</button>
+    <button class="nb" onclick="go('world')">World Issues</button>
+    <button class="nb" onclick="go('quiz')" style="color:var(--amber);">◈ Quiz</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+  SECTION 1 — RESOURCES & ENVIRONMENT
+════════════════════════════════════════════ -->
+<section class="sec" id="sec-resources">
+<div class="wrap">
+  <div class="sh">
+    <p class="sh-tag">Module 01</p>
+    <h1 class="sh-title">Resources &amp; the<br><em>Environment</em></h1>
+    <p class="sh-desc">Natural resources sustain human civilisation. Managing them sustainably — while protecting the environment — is one of the defining challenges of the 21st century.</p>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val">8B+</div><div class="stat-lbl">World population demanding resources</div></div>
+    <div class="stat"><div class="stat-val amber">40%</div><div class="stat-lbl">Of global land used for agriculture</div></div>
+    <div class="stat"><div class="stat-val red">1M+</div><div class="stat-lbl">Species threatened with extinction</div></div>
+    <div class="stat"><div class="stat-val blue">97%</div><div class="stat-lbl">Of Earth's water is saltwater</div></div>
+    <div class="stat"><div class="stat-val">1.5°C</div><div class="stat-lbl">Paris Agreement warming target</div></div>
+  </div>
+
+  <h2 class="h2s">Types of Resources</h2>
+  <table class="gt">
+    <thead><tr><th>Type</th><th>Definition</th><th>Examples</th><th>Key Concern</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Renewable</strong></td><td>Naturally replenished on a human timescale</td><td>Solar, wind, wave, tidal, geothermal, timber (managed)</td><td>Intermittency; infrastructure cost; land use</td></tr>
+      <tr><td><strong>Non-renewable</strong></td><td>Finite — forms over millions of years; cannot be replaced once used</td><td>Coal, oil, natural gas, uranium, mineral ores</td><td>Depletion; climate change; geopolitical conflict over reserves</td></tr>
+      <tr><td><strong>Flow resources</strong></td><td>Naturally occurring ongoing flows — cannot be stored</td><td>Wind, wave, solar radiation, tidal</td><td>Cannot be saved; must be used when available</td></tr>
+      <tr><td><strong>Stock resources</strong></td><td>Accumulated over time; can be stored and used at any rate</td><td>Coal, groundwater, fossil fuels, mineral deposits</td><td>Overextraction; depletion risk</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tc">
+    <div class="dp">
+      <h4>Energy Resources</h4>
+      <ul>
+        <li><strong>Fossil fuels</strong> supply ~80% of global energy — coal, oil, and natural gas. Burning them releases CO₂, the main driver of climate change.</li>
+        <li><strong>Nuclear power</strong> — low carbon but produces radioactive waste; risk of accidents (Chernobyl, Fukushima).</li>
+        <li><strong>Renewables</strong> (solar, wind, hydro) — growing rapidly but variable output; require grid storage solutions like batteries.</li>
+        <li><strong>Biomass</strong> — burning organic material; carbon-neutral if managed sustainably, but land-intensive.</li>
+        <li><strong>Energy mix</strong> varies by country — Norway is nearly 100% hydroelectric; Saudi Arabia relies on oil.</li>
+      </ul>
+    </div>
+    <div class="dp">
+      <h4>Water as a Resource</h4>
+      <ul>
+        <li>Only <strong>3% of Earth's water is fresh</strong>, and most of that is locked in glaciers and ice caps. Less than 1% is accessible for human use.</li>
+        <li><strong>Water stress</strong> occurs when demand exceeds supply — affects 40% of the world's population.</li>
+        <li><strong>Causes of scarcity</strong>: population growth; irrigation (agriculture uses 70% of global freshwater); climate change; pollution; unequal distribution.</li>
+        <li><strong>Virtual water</strong> — the hidden water used to produce goods (1 kg of beef requires ~15,000 litres of water).</li>
+        <li><strong>Water conflicts</strong> — the Nile basin (Ethiopia's Grand Renaissance Dam), the Colorado River (USA/Mexico), the Aral Sea disaster.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="h2s">Environmental Issues</h2>
+  <div class="thc">
+    <div class="card"><div class="card-ico">🌡️</div><h3>Climate Change</h3><p>Burning fossil fuels releases CO₂ and methane, enhancing the greenhouse effect. Average temperatures have risen ~1.1°C above pre-industrial levels. Effects: extreme weather, sea level rise, species extinction, crop failure, displacement.</p></div>
+    <div class="card"><div class="card-ico">🌳</div><h3>Deforestation</h3><p>12–15 million hectares of forest are lost annually — driven by agriculture (especially beef and soy in the Amazon), logging, and urbanisation. Consequences: CO₂ release, biodiversity loss, soil erosion, disrupted water cycles.</p></div>
+    <div class="card"><div class="card-ico">🐟</div><h3>Ocean Pollution</h3><p>8 million tonnes of plastic enter oceans each year. Oil spills, agricultural runoff (causing dead zones), and microplastics accumulate in food chains. Ocean acidification from CO₂ dissolving in seawater destroys coral reefs.</p></div>
+    <div class="card"><div class="card-ico">🏜️</div><h3>Desertification</h3><p>The expansion of desert-like conditions into previously productive land — driven by overgrazing, poor irrigation, deforestation, and climate change. The Sahel region of Africa is a major affected area.</p></div>
+    <div class="card"><div class="card-ico">🌿</div><h3>Biodiversity Loss</h3><p>The 6th mass extinction is underway — driven by habitat destruction, pollution, climate change, invasive species, and overexploitation. Scientists estimate species are going extinct 100–1,000× faster than the natural background rate.</p></div>
+    <div class="card"><div class="card-ico">♻️</div><h3>Sustainable Development</h3><p>The UN defines sustainable development as meeting "the needs of the present without compromising the ability of future generations to meet their own needs." Requires balancing economic growth, social equity, and environmental protection.</p></div>
+  </div>
+
+  <h2 class="h2s teal">Sustainable Resource Management</h2>
+  <table class="gt">
+    <thead><tr><th>Strategy</th><th>How It Works</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Recycling</strong></td><td>Reprocessing waste materials to make new products — saves raw materials and energy</td><td>Aluminium recycling saves 95% of energy vs producing from raw bauxite</td></tr>
+      <tr><td><strong>Renewable energy transition</strong></td><td>Replacing fossil fuels with solar, wind, hydro, and geothermal to reduce carbon emissions</td><td>Denmark generates over 50% of electricity from wind power</td></tr>
+      <tr><td><strong>Sustainable agriculture</strong></td><td>Farming methods that maintain soil health, reduce chemical use, and protect water</td><td>Crop rotation, organic farming, agroforestry</td></tr>
+      <tr><td><strong>Forest management</strong></td><td>Replanting and protecting forests; REDD+ pays countries to preserve forests</td><td>Brazil reduced Amazon deforestation by 80% (2004–2012) before it rose again</td></tr>
+      <tr><td><strong>Water conservation</strong></td><td>Drip irrigation, desalination, wastewater recycling, water pricing reforms</td><td>Israel recycles ~90% of its wastewater for agriculture</td></tr>
+      <tr><td><strong>International agreements</strong></td><td>Global cooperation to set emissions targets and protect biodiversity</td><td>Paris Agreement (2015); Kyoto Protocol; Convention on Biological Diversity</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  SECTION 2 — INTERNATIONAL DEVELOPMENT
+════════════════════════════════════════════ -->
+<section class="sec" id="sec-development">
+<div class="wrap">
+  <div class="sh">
+    <p class="sh-tag">Module 02</p>
+    <h1 class="sh-title">International<br><em>Development</em></h1>
+    <p class="sh-desc">Development refers to improvements in people's quality of life — economically, socially, and politically. It is measured in many ways and unevenly distributed around the world.</p>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val amber">700M</div><div class="stat-lbl">People living on &lt;$2.15/day (extreme poverty)</div></div>
+    <div class="stat"><div class="stat-val">0.945</div><div class="stat-lbl">Norway's HDI (highest in world)</div></div>
+    <div class="stat"><div class="stat-val red">45M</div><div class="stat-lbl">Children die from hunger-related causes annually</div></div>
+    <div class="stat"><div class="stat-val blue">$13T</div><div class="stat-lbl">Annual global development finance needed (UN)</div></div>
+  </div>
+
+  <h2 class="h2s">Measuring Development</h2>
+  <table class="gt">
+    <thead><tr><th>Indicator</th><th>What It Measures</th><th>Limitation</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GDP per capita</strong></td><td>Total economic output divided by population — average wealth</td><td>Doesn't measure inequality; doesn't reflect quality of life</td></tr>
+      <tr><td><strong>GNI per capita</strong></td><td>Gross National Income per person — includes overseas earnings</td><td>Average hides extreme inequality; ignores non-monetary well-being</td></tr>
+      <tr><td><strong>HDI (Human Development Index)</strong></td><td>Composite of life expectancy, education (mean &amp; expected years schooling), and GNI per capita</td><td>Still misses inequality, gender disparity, environmental sustainability</td></tr>
+      <tr><td><strong>Life expectancy</strong></td><td>Average age at death — reflects healthcare, nutrition, conflict</td><td>Averages can hide infant mortality vs elderly deaths</td></tr>
+      <tr><td><strong>Infant mortality rate</strong></td><td>Deaths per 1,000 live births under age 1 — sensitive indicator of healthcare and poverty</td><td>Improving globally but still 38× higher in poorest vs richest countries</td></tr>
+      <tr><td><strong>Literacy rate</strong></td><td>% of adults who can read and write</td><td>Doesn't measure quality of education; varies widely by age/gender</td></tr>
+      <tr><td><strong>Access to clean water</strong></td><td>% of population with safe drinking water</td><td>2 billion people still lack safely managed water (WHO, 2023)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="h2s">Causes of Uneven Development</h2>
+  <div class="tc">
+    <div class="dp">
+      <h4>Historical Causes</h4>
+      <ul>
+        <li><strong>Colonialism</strong> — European powers extracted resources from colonies for centuries, leaving exploited economies; arbitrary borders divided ethnic groups and created instability</li>
+        <li><strong>The Scramble for Africa</strong> (1880s) — Africa's resources fuelled European industrialisation while leaving African nations underdeveloped</li>
+        <li><strong>Slave trade</strong> — removed millions of people from Africa, disrupting societies and economies for generations</li>
+        <li><strong>Unequal trade relationships</strong> — post-independence, many countries remained economically dependent on former colonisers, selling raw materials cheaply and buying expensive manufactured goods</li>
+      </ul>
+    </div>
+    <div class="ap">
+      <h4>Current Causes</h4>
+      <ul>
+        <li><strong>Geographic factors</strong> — landlocked countries, tropical disease burden, lack of natural resources, vulnerability to natural disasters</li>
+        <li><strong>Political instability</strong> — civil wars, corruption, poor governance; conflict destroys infrastructure and drives away investment</li>
+        <li><strong>Debt</strong> — many LICs (Low Income Countries) owe more in debt repayments than they receive in aid</li>
+        <li><strong>Trade barriers</strong> — HICs impose tariffs that prevent LIC manufactured goods from competing</li>
+        <li><strong>Brain drain</strong> — skilled workers emigrate to HICs, depriving developing nations of doctors, engineers, and teachers</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="h2s">Aid and Development Strategies</h2>
+  <div class="thc">
+    <div class="card"><div class="card-ico">💊</div><h3>Short-term Aid</h3><p>Emergency/humanitarian aid for disasters — food, medicine, shelter, water. Provided by governments, NGOs (e.g. Oxfam, MSF), and UN agencies. Fast but doesn't address root causes.</p></div>
+    <div class="card"><div class="card-ico">🏗️</div><h3>Long-term Development Aid</h3><p>Projects to build infrastructure (roads, schools, hospitals), improve governance, support agriculture, and develop local industries. Aims at sustainable, lasting improvement.</p></div>
+    <div class="card"><div class="card-ico">🤝</div><h3>Bilateral vs Multilateral Aid</h3><p>Bilateral = country to country (often with conditions). Multilateral = through international organisations (World Bank, IMF, UN). Multilateral seen as more impartial.</p></div>
+    <div class="card"><div class="card-ico">📈</div><h3>Trade vs Aid</h3><p>"Trade not aid" — fairer trade rules, removing subsidies in HICs, and giving LICs access to markets is argued to be more effective than aid. E.g. Fairtrade certification.</p></div>
+    <div class="card"><div class="card-ico">🏦</div><h3>Loans &amp; Microfinance</h3><p>World Bank and IMF loans can fund development but often come with conditions (structural adjustment). Microfinance gives small loans to entrepreneurs in LICs — empowers women especially.</p></div>
+    <div class="card"><div class="card-ico">🎯</div><h3>UN Sustainable Development Goals</h3><p>17 SDGs adopted in 2015 — a global blueprint for development by 2030. Includes ending poverty, zero hunger, quality education, gender equality, clean energy, and climate action.</p></div>
+  </div>
+
+  <div class="hl">
+    <strong>Case Study — Ethiopia:</strong> One of the world's poorest nations (GNI per capita ~$1,000) but has shown rapid economic growth (10% pa for a decade). Challenges include drought, land-locked geography, and political conflict in Tigray. International aid, Chinese infrastructure investment, and growing manufacturing are driving development. Remains an HDI of 0.498 — low human development.
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  SECTION 3 — ECONOMIC ACTIVITY
+════════════════════════════════════════════ -->
+<section class="sec" id="sec-economy">
+<div class="wrap">
+  <div class="sh">
+    <p class="sh-tag">Module 03</p>
+    <h1 class="sh-title">Economic<br><em>Activity</em></h1>
+    <p class="sh-desc">Economic activity describes how countries and people produce and consume goods and services. The structure of an economy reflects its level of development.</p>
+    <div class="sh-line"></div>
+  </div>
+
+  <h2 class="h2s">The Four Sectors of Economic Activity</h2>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">01</div><div class="stat-lbl">Primary — extraction of raw materials</div></div>
+    <div class="stat"><div class="stat-val">02</div><div class="stat-lbl">Secondary — manufacturing & construction</div></div>
+    <div class="stat"><div class="stat-val">03</div><div class="stat-lbl">Tertiary — services & trade</div></div>
+    <div class="stat"><div class="stat-val">04</div><div class="stat-lbl">Quaternary — knowledge & R&D</div></div>
+  </div>
+
+  <table class="gt">
+    <thead><tr><th>Sector</th><th>Activities</th><th>Examples</th><th>Typical in</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Primary</strong></td><td>Extraction of raw materials from land/sea</td><td>Farming, fishing, mining, forestry, oil extraction</td><td>LICs — large % of workforce; often poorly paid</td></tr>
+      <tr><td><strong>Secondary</strong></td><td>Processing raw materials into goods; construction</td><td>Steel production, car manufacturing, food processing, construction</td><td>NEEs (Newly Emerging Economies) during industrialisation</td></tr>
+      <tr><td><strong>Tertiary</strong></td><td>Providing services to people and businesses</td><td>Retail, banking, healthcare, education, transport, tourism</td><td>HICs — largest % of workforce; most GDP</td></tr>
+      <tr><td><strong>Quaternary</strong></td><td>Knowledge, information, and research-based work</td><td>IT, biotechnology, scientific research, media, consultancy</td><td>Highly developed HICs — Silicon Valley, London, Tokyo</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="h2s">Economic Development Stages</h2>
+  <div class="dp" style="margin-bottom:1.5rem;">
+    <h4>Rostow's Stages of Economic Growth (1960)</h4>
+    <ul>
+      <li><strong>Stage 1 — Traditional society:</strong> Subsistence agriculture, limited technology. e.g. parts of sub-Saharan Africa</li>
+      <li><strong>Stage 2 — Pre-conditions for take-off:</strong> Commercial agriculture, some manufacturing, improved infrastructure. e.g. Ethiopia now</li>
+      <li><strong>Stage 3 — Take-off:</strong> Rapid industrialisation; manufacturing expands; urbanisation accelerates. e.g. China 1980s–2000s</li>
+      <li><strong>Stage 4 — Drive to maturity:</strong> Diversified economy; modern technology throughout; reduced poverty. e.g. Mexico, Brazil</li>
+      <li><strong>Stage 5 — Mass consumption:</strong> High income; service-dominated; consumerism. e.g. USA, Germany, UK, Japan</li>
+    </ul>
+  </div>
+
+  <h2 class="h2s">Globalisation &amp; Trade</h2>
+  <div class="tc">
+    <div class="fc">
+      <h4>What is Globalisation?</h4>
+      <p class="bp">Globalisation is the process by which the world's economies, cultures, and populations have become increasingly interconnected and interdependent through trade, investment, technology, and migration.</p>
+      <p class="bp">Key drivers: containerisation (cheap shipping), the internet, deregulation of trade, growth of TNCs (Transnational Corporations), and falling communication costs.</p>
+    </div>
+    <div class="fc">
+      <h4>TNCs — Transnational Corporations</h4>
+      <p class="bp">TNCs are companies that operate in multiple countries. They include Apple, Nike, McDonald's, and Shell. TNCs provide jobs and investment in LICs but often move profits back to HICs, use cheap labour, and have significant environmental impacts.</p>
+      <p class="bp"><strong>Advantages for host countries:</strong> jobs, technology transfer, improved infrastructure, tax revenue.<br><strong>Disadvantages:</strong> low wages, poor conditions, profit repatriation, environmental damage.</p>
+    </div>
+  </div>
+
+  <div class="thc">
+    <div class="card"><div class="card-ico">🏭</div><h3>Deindustrialisation</h3><p>The decline of manufacturing in HICs as factories move to countries with cheaper labour (e.g. China, Bangladesh). Led to unemployment and social deprivation in former industrial cities (e.g. Detroit, Sheffield).</p></div>
+    <div class="card"><div class="card-ico">🌏</div><h3>Newly Emerging Economies (NEEs)</h3><p>Countries that have rapidly industrialised and are transitioning from primary to secondary/tertiary — BRICS (Brazil, Russia, India, China, South Africa). China now has the world's 2nd largest economy.</p></div>
+    <div class="card"><div class="card-ico">🤖</div><h3>The Knowledge Economy</h3><p>In post-industrial HICs, growth comes from quaternary industries — IT, finance, research, creative industries. Skills and education matter more than physical labour. Drives demand for highly qualified workers.</p></div>
+    <div class="card"><div class="card-ico">⚖️</div><h3>Fair Trade</h3><p>Guarantees minimum prices for producers in LICs, ensuring fair wages and safe conditions. Coffee, chocolate, and bananas are key fair trade products. Criticised by some for market distortions.</p></div>
+    <div class="card"><div class="card-ico">🏦</div><h3>Free Trade vs Protectionism</h3><p>Free trade removes tariffs and barriers — WTO promotes this. Protectionism uses tariffs/quotas to protect domestic industries. HICs often subsidise their own agriculture while demanding LICs open markets.</p></div>
+    <div class="card"><div class="card-ico">🌐</div><h3>Informal Economy</h3><p>Unregulated, untaxed economic activity. In LICs, 60–80% of employment can be informal — street vending, domestic work, small-scale services. Workers have no rights or social protection.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  SECTION 4 — POPULATION
+════════════════════════════════════════════ -->
+<section class="sec" id="sec-population">
+<div class="wrap">
+  <div class="sh">
+    <p class="sh-tag">Module 04</p>
+    <h1 class="sh-title"><em>Population</em></h1>
+    <p class="sh-desc">World population has grown from 1 billion in 1800 to over 8 billion today. Understanding population change is essential to addressing food security, resource demands, and development.</p>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val">8.1B</div><div class="stat-lbl">World population (2024)</div></div>
+    <div class="stat"><div class="stat-val amber">2050</div><div class="stat-lbl">Projected peak ~9.7B</div></div>
+    <div class="stat"><div class="stat-val blue">56%</div><div class="stat-lbl">Now live in urban areas</div></div>
+    <div class="stat"><div class="stat-val red">3.7</div><div class="stat-lbl">Births/woman in LICs vs 1.6 in HICs</div></div>
+    <div class="stat"><div class="stat-val">68</div><div class="stat-lbl">Global average life expectancy (years)</div></div>
+  </div>
+
+  <h2 class="h2s">Key Population Terms</h2>
+  <table class="gt">
+    <thead><tr><th>Term</th><th>Definition</th><th>Formula/Note</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Birth rate (BR)</strong></td><td>Number of live births per 1,000 people per year</td><td>High in LICs (30–40+); low in HICs (8–12)</td></tr>
+      <tr><td><strong>Death rate (DR)</strong></td><td>Number of deaths per 1,000 people per year</td><td>Falls with improved healthcare</td></tr>
+      <tr><td><strong>Natural increase</strong></td><td>Population growth from births minus deaths</td><td>NI = BR − DR (expressed as % or per 1,000)</td></tr>
+      <tr><td><strong>Migration</strong></td><td>Movement of people — immigration adds, emigration removes population</td><td>Net migration = immigration − emigration</td></tr>
+      <tr><td><strong>Fertility rate</strong></td><td>Average number of children per woman</td><td>2.1 needed for replacement level</td></tr>
+      <tr><td><strong>Dependency ratio</strong></td><td>Proportion of non-working population (young + elderly) to working-age population</td><td>(0–14 + 65+) ÷ (15–64) × 100</td></tr>
+      <tr><td><strong>Population density</strong></td><td>Number of people per km²</td><td>Bangladesh = 1,265/km²; Australia = 3.5/km²</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="h2s">The Demographic Transition Model (DTM)</h2>
+  <div class="fc">
+    <h4>5 Stages of the DTM</h4>
+    <div class="steps">
+      <div class="step" data-n="1"><h5>Stage 1 — High Stationary</h5><p>High birth rate AND high death rate → slow population growth. Pre-industrial societies. Very high infant mortality; no reliable contraception; children needed for labour. e.g. remote tribal communities today.</p></div>
+      <div class="step" data-n="2"><h5>Stage 2 — Early Expanding</h5><p>Death rate falls (improved sanitation, medicine, food supply) but birth rate remains high → rapid population growth. e.g. Sub-Saharan Africa, parts of South Asia today; UK in early 19th century.</p></div>
+      <div class="step" data-n="3"><h5>Stage 3 — Late Expanding</h5><p>Birth rate begins to fall (urbanisation, education for women, contraception, lower infant mortality) while death rate continues to fall → population still grows but more slowly. e.g. Brazil, India in transition.</p></div>
+      <div class="step" data-n="4"><h5>Stage 4 — Low Stationary</h5><p>Both birth rate and death rate are low → low population growth. e.g. UK, USA, France today. Ageing population becomes the main challenge.</p></div>
+      <div class="step" data-n="5"><h5>Stage 5 — Decline</h5><p>Birth rate falls below death rate → natural population decrease. e.g. Japan, Germany, Italy. Immigration may offset declining population.</p></div>
+    </div>
+  </div>
+
+  <h2 class="h2s">Population Policies</h2>
+  <div class="tc">
+    <div class="dp">
+      <h4>Anti-natalist Policies (reducing birth rate)</h4>
+      <ul>
+        <li><strong>China's One Child Policy (1980–2015):</strong> Limited most urban families to one child. Fines for violations; state pressure. Reduced birth rate but created gender imbalance (preference for sons), ageing population, and ethical abuses.</li>
+        <li><strong>India's Family Planning Programme:</strong> Education, contraception provision, and financial incentives for sterilisation. Less coercive than China but some forced sterilisations reported.</li>
+        <li><strong>Iran:</strong> Reversed from pro-natalist to anti-natalist and back again based on government priorities.</li>
+      </ul>
+    </div>
+    <div class="ap">
+      <h4>Pro-natalist Policies (increasing birth rate)</h4>
+      <ul>
+        <li><strong>France:</strong> One of the most successful pro-natalist programmes — generous maternity/paternity leave, childcare subsidies, tax benefits for families with 3+ children. Birth rate has risen to 1.84.</li>
+        <li><strong>Sweden:</strong> Generous parental leave (up to 480 days shared between parents), universal childcare. Birth rate stabilised.</li>
+        <li><strong>Singapore:</strong> Cash grants ("baby bonuses"), tax rebates, childcare subsidies. Earlier anti-natalist policies caused population decline that required reversal.</li>
+        <li><strong>Hungary:</strong> Mortgage subsidies, lifetime income tax exemptions for mothers of 4+ children.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="h2s">Migration</h2>
+  <div class="thc">
+    <div class="card"><h3>Push Factors</h3><p>Reasons why people leave a place: poverty, unemployment, war and conflict, natural disasters, persecution, climate change, famine, lack of services (healthcare, education).</p></div>
+    <div class="card"><h3>Pull Factors</h3><p>Reasons why people are attracted to a destination: better jobs, higher wages, political stability, safety, better education and healthcare, family reunification, more freedoms.</p></div>
+    <div class="card"><h3>Economic Migration</h3><p>Moving primarily to improve economic opportunities. e.g. Eastern Europeans to UK post-2004 EU expansion; Mexicans to USA; Indian IT workers to Silicon Valley.</p></div>
+    <div class="card"><h3>Refugees &amp; Asylum Seekers</h3><p>Refugees flee persecution, war, or disaster — legally protected under 1951 UN Refugee Convention. By 2024, over 100 million forcibly displaced people worldwide — the highest ever recorded.</p></div>
+    <div class="card"><h3>Impacts on Origin Country</h3><p>Negative: brain drain (loses skilled workers); reduced workforce. Positive: remittances (money sent home — $800B+ annually globally, more than total aid).</p></div>
+    <div class="card"><h3>Impacts on Host Country</h3><p>Positive: fills labour shortages; cultural diversity; pays taxes; entrepreneurship. Negative: pressure on services; housing; potential social tensions if integration is poor.</p></div>
+  </div>
+
+  <div class="hl"><strong>Urbanisation:</strong> Over half the world's population now lives in cities — a figure expected to reach 70% by 2050. Urbanisation is fastest in Africa and Asia. Megacities (populations over 10 million) include Tokyo (37M), Delhi (33M), Shanghai (29M), and Lagos (15M). Rapid urbanisation creates challenges: housing shortages, slums (informal settlements), traffic congestion, pollution, and overstretched infrastructure.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  SECTION 5 — WORLD ISSUES
+════════════════════════════════════════════ -->
+<section class="sec" id="sec-world">
+<div class="wrap">
+  <div class="sh">
+    <p class="sh-tag">Module 05</p>
+    <h1 class="sh-title">World<br><em>Issues</em></h1>
+    <p class="sh-desc">Interconnected global challenges — from conflict and inequality to climate change and food security — require international cooperation and understanding.</p>
+    <div class="sh-line"></div>
+  </div>
+
+  <h2 class="h2s">Global Inequality</h2>
+  <div class="stats">
+    <div class="stat"><div class="stat-val red">1%</div><div class="stat-lbl">Richest own more wealth than bottom 50% combined</div></div>
+    <div class="stat"><div class="stat-val amber">$2.15</div><div class="stat-lbl">World Bank extreme poverty line per day</div></div>
+    <div class="stat"><div class="stat-val">85</div><div class="stat-lbl">Life expectancy in Japan vs 53 in CAR</div></div>
+    <div class="stat"><div class="stat-val blue">0.7%</div><div class="stat-lbl">UN target for aid as % of GNI (few HICs meet it)</div></div>
+  </div>
+
+  <div class="tc">
+    <div class="dp">
+      <h4>Causes of Global Inequality</h4>
+      <ul>
+        <li><strong>Colonial legacy</strong> — exploited economies, drawn borders, resource extraction for centuries</li>
+        <li><strong>Unfair trade rules</strong> — HICs subsidise agriculture; LICs cannot compete; tariffs on LIC manufactured goods</li>
+        <li><strong>Debt burden</strong> — some LICs spend more on debt repayment than healthcare or education</li>
+        <li><strong>Conflict</strong> — destroys infrastructure, disrupts development, creates refugees</li>
+        <li><strong>Geography</strong> — landlocked nations, disease burden, climate vulnerability</li>
+        <li><strong>Corruption and poor governance</strong> — aid and resources lost to corruption rather than reaching people</li>
+      </ul>
+    </div>
+    <div class="ap">
+      <h4>Consequences of Global Inequality</h4>
+      <ul>
+        <li>Preventable disease and malnutrition kill millions annually</li>
+        <li>811 million people go to bed hungry every night</li>
+        <li>150 million children stunted from chronic malnutrition</li>
+        <li>Inequality drives migration and refugee crises</li>
+        <li>Political instability and conflict more likely in highly unequal societies</li>
+        <li>Environmental damage — poorest countries most vulnerable to climate change they contributed least to</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="h2s">Global Conflicts</h2>
+  <div class="thc">
+    <div class="card"><div class="card-ico">💣</div><h3>Causes of Conflict</h3><p>Resource competition (water, oil, land), ethnic/religious differences, political power struggles, inequality, colonial border legacies, nationalism, and competition for strategic territory.</p></div>
+    <div class="card"><div class="card-ico">🌍</div><h3>Types of Conflict</h3><p>Civil war (intrastate), interstate war, terrorism, genocide, proxy wars (superpowers funding opposing sides). Many modern conflicts are hybrid — combining conventional warfare and terrorism.</p></div>
+    <div class="card"><div class="card-ico">🕊️</div><h3>Consequences of Conflict</h3><p>Death and injury; displacement (100M+ forcibly displaced globally); economic destruction; healthcare and education collapse; psychological trauma; regional destabilisation; refugee crises.</p></div>
+    <div class="card"><div class="card-ico">🏛️</div><h3>Role of International Organisations</h3><p>UN Security Council authorises peacekeeping missions (90,000+ UN peacekeepers deployed). NATO provides collective defence. ICC prosecutes war crimes. WHO coordinates health responses in conflict zones.</p></div>
+    <div class="card"><div class="card-ico">⚡</div><h3>Resource Conflicts</h3><p>Water — Nile basin disputes; South China Sea disputes over fishing/oil; Congo wars partly driven by minerals (coltan in phones). "Resource curse" — mineral-rich countries often have more conflict, not less.</p></div>
+    <div class="card"><div class="card-ico">🛡️</div><h3>Peacebuilding</h3><p>Post-conflict: disarmament, demobilisation, reconstruction; transitional justice (truth and reconciliation commissions); institution building; economic recovery; education for peace. Rwanda's recovery since 1994 genocide is a remarkable case study.</p></div>
+  </div>
+
+  <h2 class="h2s">Food Security &amp; Hunger</h2>
+  <div class="fc">
+    <h4>The Food Security Challenge</h4>
+    <p class="bp">Food security exists when all people, at all times, have physical, social, and economic access to sufficient, safe, and nutritious food. Currently, <strong>811 million people are undernourished</strong>, while 2 billion are overweight or obese — the "double burden of malnutrition."</p>
+    <table class="gt" style="margin-top:1rem;">
+      <thead><tr><th>Factor</th><th>Impact on Food Security</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Climate change</strong></td><td>Disrupted rainfall, more extreme droughts and floods, shifting growing zones, reduced crop yields</td></tr>
+        <tr><td><strong>Population growth</strong></td><td>By 2050, food production must increase ~70% to feed 9.7 billion people</td></tr>
+        <tr><td><strong>Poverty</strong></td><td>People can't afford food even when it's available — economic access is as important as supply</td></tr>
+        <tr><td><strong>Water scarcity</strong></td><td>Agriculture uses 70% of freshwater; water stress threatens crop production in many regions</td></tr>
+        <tr><td><strong>Land degradation</strong></td><td>Soil erosion, desertification, and salinisation reduce productive farmland globally</td></tr>
+        <tr><td><strong>Food waste</strong></td><td>~33% of all food produced globally is lost or wasted — enough to feed all hungry people twice over</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="h2s">Climate Change as a Global Issue</h2>
+  <div class="tc">
+    <div class="dp">
+      <h4>Global Impact of Climate Change</h4>
+      <ul>
+        <li><strong>Sea level rise</strong> — threatens low-lying nations (Maldives, Bangladesh, Pacific island states); 1B people live within 10m of sea level</li>
+        <li><strong>Extreme weather</strong> — stronger hurricanes, prolonged droughts, more severe floods; 2023 was the hottest year ever recorded</li>
+        <li><strong>Climate refugees</strong> — by 2050, up to 1 billion people may be displaced by climate change</li>
+        <li><strong>Arctic amplification</strong> — Arctic warming at 3× the global average; permafrost thaw releases methane</li>
+        <li><strong>Ecosystem collapse</strong> — coral reef bleaching; Amazon dieback; loss of boreal forest; species extinction</li>
+      </ul>
+    </div>
+    <div class="ap">
+      <h4>International Climate Response</h4>
+      <ul>
+        <li><strong>Paris Agreement (2015)</strong> — 196 countries agreed to limit warming to 1.5–2°C above pre-industrial levels through nationally determined contributions (NDCs)</li>
+        <li><strong>COP meetings</strong> — annual UN climate conferences. COP28 (2023) first agreement to transition away from fossil fuels</li>
+        <li><strong>Net zero targets</strong> — UK targets net zero by 2050; EU by 2050; China by 2060 (though still building coal plants)</li>
+        <li><strong>Climate finance</strong> — $100B/year promised by rich nations to help poor nations adapt. Most targets not met.</li>
+        <li><strong>Loss and damage</strong> — breakthrough at COP27/28: fund established for countries suffering climate damages they didn't cause</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="h2s">Health as a Global Issue</h2>
+  <div class="thc">
+    <div class="card"><div class="card-ico">🦠</div><h3>Infectious Disease</h3><p>Diseases like malaria (600,000 deaths/year), tuberculosis (1.6M/year), and HIV/AIDS (650,000/year) disproportionately affect LICs. COVID-19 killed 7M+ globally and exposed deep health inequalities between rich and poor nations.</p></div>
+    <div class="card"><div class="card-ico">💉</div><h3>WHO &amp; Global Health</h3><p>The World Health Organisation coordinates international health response — disease surveillance, vaccine programmes, health standards. Funded by member states. Its COVID response was criticised as slow; praised for polio eradication progress.</p></div>
+    <div class="card"><div class="card-ico">🏥</div><h3>Health Inequalities</h3><p>People in LICs are far more likely to die from preventable diseases. 400M people lack basic healthcare. A child born in Sierra Leone is 80× more likely to die before age 5 than one born in Norway. Access to medicines is also deeply unequal.</p></div>
+  </div>
+
+  <div class="hl"><strong>The UN &amp; International Cooperation:</strong> The United Nations (193 member states) is the primary forum for international cooperation. Key bodies: UN General Assembly (all nations equal vote), UN Security Council (15 members, 5 permanent with veto power: USA, UK, France, Russia, China), UN Human Rights Council, UNESCO, UNICEF, UNHCR (refugees), WFP (food). The UN's effectiveness is limited by the Security Council veto and reliance on member state funding and consent.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  QUIZ
+════════════════════════════════════════════ -->
+<section class="sec" id="sec-quiz">
+<div class="wrap">
+  <div class="sh">
+    <p class="sh-tag">Test Yourself</p>
+    <h1 class="sh-title"><em>Global Issues</em> Quiz</h1>
+    <p class="sh-desc">30 questions across all 5 modules. Instant feedback and full explanations on every question.</p>
+    <div class="sh-line"></div>
+  </div>
+  <div class="qwrap">
+    <div id="qstart">
+      <div class="fc" style="text-align:center;padding:3rem;">
+        <div style="font-size:3rem;margin-bottom:1rem;">🌐</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:1.6rem;font-style:italic;color:var(--text);margin-bottom:.5rem;">Ready to test your knowledge?</h3>
+        <p class="bp" style="max-width:400px;margin:0 auto 2rem;">30 questions spanning Resources, Development, Economy, Population, and World Issues.</p>
+        <button class="btn btn-p" onclick="startQ()">Begin Quiz →</button>
+      </div>
+    </div>
+    <div id="qactive" style="display:none;"></div>
+    <div id="qresults" style="display:none;"></div>
+  </div>
+</div>
+</section>
+
+<script>
+// ── THEME TOGGLE ──────────────────────────────
+function toggleTheme(){
+  const isLight = document.documentElement.classList.contains('light');
+  const btn = document.getElementById('togBtn');
+  if(isLight){
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+    btn.textContent = '☀️';
+    try{localStorage.setItem('geocore-theme','dark');}catch(e){}
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    btn.textContent = '🌙';
+    try{localStorage.setItem('geocore-theme','light');}catch(e){}
+  }
+}
+(function(){
+  try{
+    const t = localStorage.getItem('geocore-theme');
+    const btn = document.getElementById('togBtn');
+    if(t === 'light'){
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      if(btn) btn.textContent = '🌙';
+    }
+  }catch(e){}
+})();
+
+// ── NAVIGATION ────────────────────────────────
+function go(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sec-'+id)?.classList.add('on');
+  document.querySelector(`[onclick="go('${id}')"]`)?.classList.add('on');
+  document.getElementById('topnav').scrollIntoView({behavior:'smooth'});
+}
+
+// ── QUIZ DATA ─────────────────────────────────
+const QD = [
+  // RESOURCES
+  {t:'Resources & Environment',q:'What is the difference between a renewable and non-renewable resource?',o:['Renewable resources are more expensive to extract','Renewable resources are naturally replenished on a human timescale; non-renewable resources are finite and take millions of years to form','Renewable resources come from the sea; non-renewable resources come from the land','Renewable resources are only used in HICs'],a:1,e:'Renewable resources (solar, wind, hydro, timber) are naturally replenished within a human lifespan. Non-renewable resources (coal, oil, gas, mineral ores) took millions of years to form and cannot be replaced once used. This is why transitioning to renewables is critical for long-term sustainability.'},
+  {t:'Resources & Environment',q:'Why is it significant that only 3% of Earth\'s water is freshwater?',o:['It means water is only found near the poles','It means the vast majority of Earth\'s water is unusable for drinking, agriculture, or industry without expensive treatment','It means water conflicts are impossible to resolve','It means most countries have water scarcity'],a:1,e:'97% of Earth\'s water is saltwater in oceans. Of the 3% that is fresh, most is locked in glaciers and ice caps. Less than 1% is accessible for human use in rivers, lakes, and groundwater. This extreme scarcity makes water management, conservation, and international cooperation over shared water sources critically important.'},
+  {t:'Resources & Environment',q:'What is the "virtual water" concept?',o:['Water that evaporates from dams','The hidden water embedded in the production of goods and food — e.g. 15,000 litres to produce 1kg of beef','Underground water that can\'t be accessed','Water wasted in rich countries while poor countries go without'],a:1,e:'Virtual water refers to the water used throughout the production process of a good. Beef requires ~15,000 litres/kg; coffee requires ~140 litres/cup; a cotton t-shirt requires ~2,700 litres. Understanding virtual water helps explain trade patterns and why exporting agricultural products from water-stressed regions can be unsustainable.'},
+  {t:'Resources & Environment',q:'Which international agreement committed countries to limiting global warming to 1.5–2°C above pre-industrial levels?',o:['The Kyoto Protocol (1997)','The Montreal Protocol','The Paris Agreement (2015)','The Brundtland Report'],a:2,e:'The Paris Agreement was adopted at COP21 in December 2015 and signed by 196 parties. Countries submitted Nationally Determined Contributions (NDCs) — pledges to reduce emissions. Unlike Kyoto, it applies to all countries (not just developed ones) but NDCs are voluntary, which is a major weakness.'},
+  {t:'Resources & Environment',q:'Which of these best describes sustainable development?',o:['Economic growth at any environmental cost','Development that meets current needs without compromising future generations\' ability to meet their needs','Only using renewable energy sources','Stopping all industrial activity to protect the environment'],a:1,e:'The Brundtland Commission (1987) defined sustainable development as "development that meets the needs of the present without compromising the ability of future generations to meet their own needs." It requires balancing three pillars: economic growth, social equity, and environmental protection.'},
+  // DEVELOPMENT
+  {t:'International Development',q:'Why is GDP per capita considered a limited measure of development?',o:['It is too complicated to calculate','It measures average income but doesn\'t reveal inequality, quality of life, access to healthcare, education, or environmental sustainability','It only applies to rich countries','It changes too frequently to be useful'],a:1,e:'GDP per capita divides total economic output by population, giving an average. However: (1) it hides extreme inequality — a country with a few billionaires and millions in poverty can have a high average; (2) it doesn\'t capture life expectancy, education, or happiness; (3) it ignores unpaid work and environmental degradation. The HDI was developed to address these limitations.'},
+  {t:'International Development',q:'What are the three components of the Human Development Index (HDI)?',o:['GDP, military spending, and education','Life expectancy, education (mean & expected years of schooling), and GNI per capita','Birth rate, death rate, and migration','Literacy rate, infant mortality, and GDP'],a:1,e:'The HDI was created by the UNDP in 1990. It combines three dimensions: (1) Long and healthy life — measured by life expectancy at birth; (2) Knowledge — measured by mean and expected years of schooling; (3) A decent standard of living — measured by GNI per capita (PPP). Countries score 0–1, with scores above 0.8 considered "very high human development."'},
+  {t:'International Development',q:'How did colonialism contribute to uneven global development?',o:['Colonial powers invested in infrastructure that benefited all colonies equally','Colonisers extracted raw materials and wealth from colonies for centuries, leaving exploited economies, artificial borders, and underdeveloped institutions when they departed','Colonialism helped countries industrialise faster','Colonial borders were carefully drawn to respect existing ethnic groups'],a:1,e:'European colonialism (especially in Africa, Asia, and Latin America) involved systematic resource extraction, forced labour, and destruction of local economies. Colonies produced raw materials for European factories at exploitative prices. Colonial education systems served colonial interests. When colonies gained independence, they inherited arbitrary borders, underdeveloped industries, and economic structures designed for extraction, not self-sufficiency.'},
+  {t:'International Development',q:'What are remittances and why are they significant for development?',o:['Loans from the World Bank to developing countries','Payments from international aid organisations','Money sent home by migrants to their families in their country of origin — totalling $800B+ annually, exceeding total foreign aid','Government payments to encourage foreign investment'],a:2,e:'Remittances are money transfers from migrants to family members in their home country. Globally they exceed $800 billion annually — far more than total official development assistance (aid). In some countries (e.g. Nepal, Tonga, El Salvador), remittances represent over 20% of GDP. They directly reduce poverty but can also create dependency and don\'t substitute for structural development.'},
+  {t:'International Development',q:'What is "brain drain" and why is it a problem for developing countries?',o:['Deforestation causing reduced rainfall','The migration of educated and skilled workers from LICs to HICs, depriving developing nations of the doctors, engineers, and teachers they desperately need','Population growth outpacing education capacity','Corruption within educational systems'],a:1,e:'Brain drain occurs when educated professionals (doctors, engineers, teachers, scientists) from LICs emigrate to HICs for higher wages and better opportunities. This directly harms development: Ghana loses more doctors to migration than work in Ghana; African nations spend money training doctors who then work in European health systems. It is a direct transfer of human capital from poor to rich countries.'},
+  // ECONOMY
+  {t:'Economic Activity',q:'In which economic sector would a factory worker manufacturing smartphones be employed?',o:['Primary — extracting raw materials','Secondary — manufacturing goods from raw materials','Tertiary — providing services','Quaternary — knowledge-based work'],a:1,e:'The secondary sector involves manufacturing and processing — turning raw materials (metals, plastics, glass) into finished products (smartphones). Factory workers, construction workers, and food processors all work in the secondary sector. HICs have largely deindustrialised — their secondary sectors have shrunk as manufacturing moved to countries with cheaper labour costs.'},
+  {t:'Economic Activity',q:'What is deindustrialisation and what has caused it in HICs?',o:['The growth of manufacturing in developing countries','The decline of manufacturing in HICs, caused by globalisation moving factories to countries with cheaper labour, automation, and the rise of the service sector','The deliberate closure of all factories for environmental reasons','The increase in primary sector employment'],a:1,e:'Deindustrialisation describes the decline of manufacturing industries in HICs like the UK, USA, and Germany since the 1970s–80s. Causes: (1) globalisation enabled companies to move factories to South-East Asia, China, and Latin America where wages are a fraction of HIC wages; (2) automation replaced workers; (3) service and knowledge economies emerged. Former industrial cities (Detroit, Sheffield, Pittsburgh) suffered severe unemployment and deprivation.'},
+  {t:'Economic Activity',q:'What is a Transnational Corporation (TNC) and what is a key criticism of them?',o:['A company owned by the United Nations that operates globally','A company with operations in multiple countries — criticised for paying low wages, exploiting workers in LICs, and repatriating profits to HIC shareholders rather than benefiting host countries','A government organisation that manages international trade','A fair trade certified company that operates across borders'],a:1,e:'TNCs (like Apple, Nike, Shell, McDonald\'s) operate across many countries. Criticisms: (1) they locate production in countries with lowest wages/weakest regulations, exploiting workers; (2) profits flow back to HIC shareholders, not staying in LIC host economies; (3) they can have enormous environmental impacts; (4) they can exert political influence on LIC governments. Supporters argue they create jobs, transfer technology, and improve infrastructure.'},
+  {t:'Economic Activity',q:'What is the difference between free trade and protectionism?',o:['Free trade means governments control all trade; protectionism means no government involvement','Free trade removes tariffs and barriers so countries can trade openly; protectionism uses tariffs, quotas, and subsidies to shield domestic industries from foreign competition','Free trade only applies between HICs; protectionism applies to LICs','They mean exactly the same thing'],a:1,e:'Free trade (promoted by the WTO) removes barriers so the most efficient producers compete globally. Protectionism uses tariffs (taxes on imports), quotas (limits on quantities), and subsidies (payments to domestic industries). The hypocrisy of many HICs is that they preach free trade while heavily subsidising their own agriculture, making it impossible for LIC farmers to compete.'},
+  // POPULATION
+  {t:'Population',q:'Which stage of the Demographic Transition Model (DTM) has both a high birth rate AND a high death rate?',o:['Stage 2','Stage 3','Stage 4','Stage 1'],a:3,e:'Stage 1 (High Stationary) has high birth rates AND high death rates, resulting in slow population growth. This characterised pre-industrial societies where high infant mortality, disease, famine, and lack of medicine kept death rates high. People had many children because many would die. Very few places remain at Stage 1 today.'},
+  {t:'Population',q:'Why does birth rate typically fall as a country develops economically?',o:['The government forces people to have fewer children','As countries develop, women gain more education and employment opportunities, contraception becomes available, infant mortality falls (so fewer children are needed for security), and children become more expensive to raise in urban settings'],a:1,e:'The demographic transition happens because: (1) Women\'s education and employment rises, giving them choices beyond motherhood; (2) Contraception becomes accessible and acceptable; (3) Infant mortality falls, so families no longer need many children to ensure some survive; (4) Urban children are economic costs (not labour as on farms); (5) Social security systems replace children as old-age insurance. This is why Stage 3 occurs naturally with development.'},
+  {t:'Population',q:'What is the dependency ratio and why does it matter?',o:['The ratio of rural to urban population','The proportion of non-working population (children under 15 and elderly over 65) to working-age population — a high ratio means fewer workers must support more dependents','The percentage of GDP spent on social welfare','The ratio of male to female population'],a:1,e:'Dependency ratio = (population 0–14 + population 65+) ÷ (population 15–64) × 100. If the ratio is high, there are relatively few workers supporting many dependents (children/elderly). This strains public finances — fewer taxpayers must fund education, pensions, and healthcare for large non-working populations. An ageing population in HICs is raising dependency ratios — a major fiscal challenge.'},
+  {t:'Population',q:'What was a major unintended consequence of China\'s One Child Policy?',o:['Population grew faster than expected','An ageing population with too few young workers, a significant gender imbalance (more males than females due to preference for sons), and human rights abuses','It caused a rapid increase in immigration to China','China\'s economy collapsed because of labour shortages'],a:1,e:'China\'s One Child Policy (1980–2015) successfully reduced fertility but created serious problems: (1) China now has a rapidly ageing population with a declining workforce — the 4-2-1 problem (4 grandparents, 2 parents, 1 child); (2) Sex-selective abortions and abandonment of baby girls created a male surplus of ~30 million; (3) The policy involved forced sterilisations and abortions. China replaced it with a three-child policy in 2021 and removed limits in 2023.'},
+  {t:'Population',q:'What is the difference between a refugee and an economic migrant?',o:['Refugees move voluntarily; economic migrants are forced to move','Refugees flee persecution, war, or disaster and have legal protection under the 1951 UN Refugee Convention; economic migrants move primarily to improve their economic prospects and do not have the same automatic legal protections','Only refugees are allowed to cross international borders legally','Economic migrants always return home; refugees are permanent'],a:1,e:'A refugee is someone who has been forced to flee their home country because of a well-founded fear of persecution, war, or serious human rights violations — and is legally protected by the 1951 Refugee Convention. An economic migrant moves voluntarily to seek better economic opportunities. The distinction matters legally — refugees cannot be returned to danger (non-refoulement principle) but economic migrants can be deported. The line is often blurred in practice.'},
+  // WORLD ISSUES
+  {t:'World Issues',q:'What is meant by the "resource curse"?',o:['Countries with no resources are always the poorest','Countries rich in natural resources often experience more conflict, corruption, and worse development outcomes than resource-poor countries — because resource wealth attracts conflict and corruption rather than broad-based development','Natural resources always run out, causing economic collapse','Rich countries hoard resources from poor countries'],a:1,e:'The resource curse (paradox of plenty) describes how countries with abundant natural resources (oil, diamonds, minerals) often have worse development outcomes than resource-poor countries. Reasons: (1) resource wealth concentrates power and is fought over — fuelling conflict; (2) governments become dependent on resource revenue, reducing accountability; (3) resource booms cause other sectors to decline; (4) volatile commodity prices cause economic instability. Examples: Democratic Republic of Congo (minerals), Nigeria (oil), Angola (oil/diamonds).'},
+  {t:'World Issues',q:'What is food security?',o:['Having enough food in supermarkets','When all people, at all times, have physical, social, and economic access to sufficient, safe, and nutritious food to meet their dietary needs for an active and healthy life','When a country produces all its own food domestically','Having no food waste in a country'],a:1,e:'The UN/FAO definition of food security has four pillars: (1) Availability — sufficient food exists; (2) Access — people can physically and economically obtain food; (3) Utilisation — food is nutritious and safely prepared; (4) Stability — access is consistent over time, not threatened by shocks. Importantly, food insecurity is often about economic access (poverty) rather than absolute food scarcity — global food production is theoretically sufficient to feed everyone.'},
+  {t:'World Issues',q:'Why are low-income countries often described as "least responsible but most vulnerable" in relation to climate change?',o:['LICs don\'t care about the environment','LICs have contributed very little to historical greenhouse gas emissions (which come mainly from HIC industrialisation) but are most geographically and economically vulnerable to the effects — flooding, drought, crop failure, sea level rise','LICs produce the most carbon but have the best defences against climate change','Climate change only affects countries near the equator'],a:1,e:'The USA, EU, and other historically industrialised nations produced the vast majority of cumulative greenhouse gas emissions. Yet LICs — particularly in South Asia, sub-Saharan Africa, and small island states — face the worst impacts: more severe droughts and floods, sea level rise threatening coastal nations (Maldives, Bangladesh, Pacific islands), crop failures affecting subsistence farmers, and disease range expansion. This climate injustice is why climate finance and "loss and damage" funding are controversial but crucial topics in international negotiations.'},
+  {t:'World Issues',q:'What are the 5 permanent members of the UN Security Council who hold veto power?',o:['USA, UK, France, Germany, China','USA, UK, France, Russia, China','USA, Russia, China, India, Brazil','USA, UK, Germany, France, Japan'],a:1,e:'The UN Security Council has 5 permanent members (P5) with veto power: the USA, UK, France, Russia, and China. These were the major Allied powers after WW2. The veto means any one P5 member can block any Security Council resolution. This has repeatedly paralysed the UN\'s response to conflicts (Russia vetoing action on Syria and Ukraine; USA vetoing action on Gaza). It is widely criticised as outdated and unrepresentative of today\'s world.'},
+  {t:'World Issues',q:'What does "net zero" mean in the context of climate change?',o:['A country that has never used fossil fuels','Achieving a balance between greenhouse gas emissions and removals — so the net amount added to the atmosphere is zero','Having zero carbon tax','Generating only renewable energy'],a:1,e:'Net zero means that the total greenhouse gases emitted into the atmosphere are balanced by the equivalent amount being removed (through forests, carbon capture, etc.). It\'s different from "zero emissions" — some emissions are very hard to eliminate (aviation, steel, agriculture), so they are offset by removal. The UK has a legally binding net zero 2050 target. Critics argue carbon offsetting can be used to avoid genuine emissions reductions.'},
+  {t:'World Issues',q:'What are remittances and what makes them more significant than aid?',o:['Government loans to developing nations','Private money transfers from migrants to families in their home countries — totalling over $800B/year globally, which exceeds total official development aid','United Nations food shipments to disaster zones','Repayments on World Bank loans'],a:1,e:'Remittances (money sent home by migrants) exceeded $800 billion globally in 2022 — roughly 3× the total of all official development assistance (foreign aid). Unlike aid, remittances go directly to households, bypassing governments and corruption. In some countries (e.g. Nepal 23% of GDP, Tonga 44% of GDP), remittances are the largest source of foreign income. However, they create dependency and can\'t substitute for domestic development.'},
+  {t:'World Issues',q:'What is the "double burden of malnutrition"?',o:['When a country exports food while its people go hungry','The simultaneous existence of undernutrition (hunger/stunting) and overnutrition (obesity/diet-related disease) within the same country or even the same community','Countries that receive too much food aid','When food prices are too high for both rich and poor people'],a:1,e:'Many LICs and MICs now face both undernutrition (insufficient calories/nutrients causing stunting, wasting, and deficiency diseases) and overnutrition (excess calories from cheap, ultra-processed foods causing obesity, diabetes, and heart disease) simultaneously — sometimes in the same households. As countries develop and processed foods become cheaper and more available, diets shift but not always to healthier foods. India and Brazil are classic examples.'},
+  {t:'World Issues',q:'What is the significance of the 0.7% GNI target for aid?',o:['It means only 0.7% of aid reaches its destination','The UN target for rich countries to spend 0.7% of their Gross National Income on foreign aid — a target few HICs consistently meet','The maximum percentage of GDP any country should spend on defence','The percentage of global trade that is fair trade certified'],a:0,e:'The UN has set a target for HICs to contribute 0.7% of their GNI as official development assistance (aid). This target was set in 1970 and reaffirmed many times. Very few countries consistently meet it — Norway, Sweden, Luxembourg, and Denmark are notable exceptions. The UK met it from 2013 but cut to 0.5% in 2021. The USA spends around 0.2%. If all HICs met the target, development finance would roughly double.'},
+  // MIXED
+  {t:'Mixed — Global Issues',q:'What is urbanisation and why is it accelerating most rapidly in LICs?',o:['The process of cities shrinking as people return to rural areas','The process of increasing proportions of people living in cities — accelerating fastest in LICs because rural-urban migration is driven by agricultural mechanisation, population growth, and the concentration of jobs and services in cities'],a:1,e:'Urbanisation is the increase in the proportion of people living in urban areas. Over 56% of the world\'s population lives in cities (2023). In LICs, urbanisation is rapid because: (1) agricultural mechanisation reduces need for rural labour; (2) cities offer better wages, healthcare, and education; (3) natural population increase is faster in cities. By 2050, 70% of the world will be urban. Challenges include slum formation, infrastructure pressure, and environmental degradation.'},
+  {t:'Mixed — Global Issues',q:'Why might a country choose protectionist trade policies even though free trade is generally seen as more economically efficient?',o:['Because they want to make other countries poor','To protect domestic industries from foreign competition (especially infant industries just starting up), preserve jobs, maintain strategic self-sufficiency (food, defence), and respond to unfair subsidies from trading partners'],a:1,e:'While free trade theory says countries should specialise in what they\'re best at, protectionism has legitimate reasons: (1) Infant industry argument — new industries need protection until they can compete globally; (2) Strategic industries (food, energy, defence) need to be maintained for national security; (3) Fairness — if trading partners subsidise their industries, unilateral free trade is disadvantageous; (4) Protecting jobs in politically sensitive industries. Critics argue protectionism ultimately makes everyone poorer by reducing efficiency.'},
+  {t:'Mixed — Global Issues',q:'What is the Sustainable Development Goals (SDGs) framework and when was it adopted?',o:['8 goals adopted in 2000, focusing only on poverty','17 goals adopted by the UN in 2015, providing a universal blueprint for sustainable development to be achieved by 2030, covering poverty, health, education, gender equality, clean energy, climate action, and more'],a:1,e:'The 17 Sustainable Development Goals were adopted by all 193 UN member states in September 2015, succeeding the Millennium Development Goals (2000–2015). They cover every dimension of development and apply universally — to both LICs and HICs. SDG 1: No Poverty; SDG 13: Climate Action; SDG 5: Gender Equality, etc. Progress has been uneven; COVID-19, conflict, and climate change have set back many goals. The 2030 deadline is unlikely to be met for most SDGs.'},
+];
+
+let qi=0,qs=0,qans=false,qlist=[];
+function startQ(){
+  qlist=[...QD].sort(()=>Math.random()-.5).slice(0,30);
+  qi=0;qs=0;qans=false;
+  document.getElementById('qstart').style.display='none';
+  document.getElementById('qresults').style.display='none';
+  document.getElementById('qactive').style.display='block';
+  renderQ();
+}
+function renderQ(){
+  qans=false;
+  const q=qlist[qi];
+  const pct=Math.round((qi/qlist.length)*100);
+  const L=['A','B','C','D'];
+  const opts=q.o.map((o,i)=>`
+    <button class="qopt" onclick="pick(${i})" id="o${i}">
+      <span class="oltr">${L[i]}</span><span>${o}</span>
+    </button>`).join('');
+  document.getElementById('qactive').innerHTML=`
+    <div class="qprog">
+      <div class="qbar"><div class="qfill" style="width:${pct}%"></div></div>
+      <span class="qtxt">${qi}/${qlist.length}</span>
+    </div>
+    <div class="qcard">
+      <p class="qtag">${q.t}</p>
+      <p class="qtext">${q.q}</p>
+      <div class="qopts">${opts}</div>
+      <div class="qexp" id="qex">${q.e}</div>
+      <div class="qfoot">
+        <span class="qsc">Score: <span id="qs2">${qs}</span>/${qi}</span>
+        <button class="btn btn-p" id="nxt" onclick="nextQ()" style="display:none;padding:.6rem 1.4rem;font-size:.72rem;">
+          ${qi+1>=qlist.length?'Results →':'Next →'}
+        </button>
+      </div>
+    </div>`;
+}
+function pick(i){
+  if(qans)return;
+  qans=true;
+  const q=qlist[qi];
+  document.querySelectorAll('.qopt').forEach(o=>o.disabled=true);
+  document.getElementById('o'+q.a).classList.add('cor');
+  if(i!==q.a) document.getElementById('o'+i).classList.add('wrg');
+  else{qs++;document.getElementById('qs2').textContent=qs;}
+  document.getElementById('qex').classList.add('show');
+  document.getElementById('nxt').style.display='block';
+}
+function nextQ(){
+  qi++;
+  if(qi>=qlist.length) showRes();
+  else renderQ();
+}
+function showRes(){
+  document.getElementById('qactive').style.display='none';
+  document.getElementById('qresults').style.display='block';
+  const pct=Math.round((qs/qlist.length)*100);
+  const msg=pct>=90?'Outstanding — exceptional global knowledge! 🌐'
+    :pct>=75?'Great work — nearly exam-ready! 📡'
+    :pct>=60?'Good effort — revisit the weaker modules.'
+    :pct>=40?'Keep going — more revision needed.'
+    :'Go back to the notes — you\'ll get there.';
+  document.getElementById('qresults').innerHTML=`
+    <div class="rcard">
+      <div class="rscore">${qs}</div>
+      <div class="rlbl">out of ${qlist.length} — ${pct}%</div>
+      <div class="rmsg">${msg}</div>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-p" onclick="startQ()">Try Again</button>
+        <button class="btn btn-g" onclick="go('resources')">Back to Notes</button>
+      </div>
+    </div>`;
+}
+
+go('resources');
+</script>
+</body>
+</html>
